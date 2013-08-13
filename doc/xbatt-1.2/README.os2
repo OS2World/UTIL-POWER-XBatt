@@ -1,0 +1,37 @@
+
+	    xbatt - battery status display for OS/2 XFree86
+
+
+* WHAT IS THIS?
+
+  xbatt is an X11 client which displays the battery status of your notebook
+computer.
+  I ported this for OS/2.
+
+
+* SYSTEM REQUIREMENT
+
+  o OS/2 3.0 or lator (with APM.SYS)
+
+  o XFree86
+	http://www.xfree86.org/
+
+  o emx run-time library (0.9d FIX 02 or lator)
+	ftp://ftp.leo.org/pub/comp/os/os2/leo/gnu/emx+gcc/
+	ftp://ftp-os2.nmsu.edu/pub/os2/dev/emx/v0.9d/
+
+  o xpm 3.4k
+	http://r350.ee.ntu.edu.tw/~hcchu/
+
+
+* MY TESTED ENVIRONMENT
+
+  H/W:	IBM ThinkPad 535 (2606-KF8)
+
+  S/W:	IBM OS/2 J4.0
+	emx 0.9d FIX 02
+	XFree86 3.3.5
+	xpm 3.4k
+							  Kyosuke Tokoro
+						    NBG01720@nifty.ne.jp
+			   http://www.vector.co.jp/authors/VA000199/os2/

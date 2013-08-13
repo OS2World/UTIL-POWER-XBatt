@@ -1,0 +1,75 @@
+--- xbatt-1.2/xbatt.c	Tue Jan 21 23:21:26 1997
++++ xbatt-1.2-os2/xbatt.c	Sat Oct 16 19:13:54 1999
+@@ -1,5 +1,5 @@
+ /*
+- * xbatt -- Display battery status for FreeBSD-2.x & Linux
++ * xbatt -- Display battery status for FreeBSD-2.x, Linux & OS/2
+  *
+  * Copyright (c) 1995,1997 by Toshihisa ETO	<eto@osl.fujitsu.co.jp>
+  *						<eto@forus.or.jp>
+@@ -40,6 +40,7 @@
+  *	97/01/20	1.2b4	Changes for Xt related part (e.g. resources)
+  *					by mi@sy.ssl.fujitsu.co.jp
+  *				Change small bugs
++ *	99/10/16	-	Support OS/2 emx, by NBG01720@nifty.ne.jp
+  */
+ 
+ #include <stdio.h>
+@@ -58,6 +59,13 @@
+ # include <X11/extensions/XKBbells.h>
+ #endif
+ 
++#ifdef __EMX__
++# define INCL_DOSFILEMGR
++# define INCL_DOSDEVICES
++# define INCL_DOSDEVIOCTL
++# include <os2.h>
++#endif
++
+ #ifdef __FreeBSD__
+ # include <machine/apm_bios.h>
+ # define APMDEV21	"/dev/apm0"
+@@ -314,6 +322,43 @@
+ struct status getBatteryStatus()
+ {
+     struct status	ret;
++#ifdef	__EMX__
++    ULONG  cbParmLen=0;
++    ULONG  cbDataLen=0;
++    ULONG  ulAction=0;
++    APIRET rc;
++    HFILE  Hf;
++    USHORT ReturnCode=0;
++#pragma pack(1) /* Define packed struction */
++    struct {
++	USHORT ParamLength;
++	USHORT PowerFlags;
++	UCHAR  ACStatus;
++	UCHAR  BatteryStatus;
++	UCHAR  BatteryLife;
++    }param={sizeof param};
++#pragma pack()	/* Restore default */
++
++    if (DosOpen("\\DEV\\APM$", &Hf, &ulAction,
++		0, FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS,
++		OPEN_FLAGS_FAIL_ON_ERROR | OPEN_SHARE_DENYNONE
++		| OPEN_ACCESS_READWRITE, NULL)){
++	fputs("xbatt: cannot open apm device\n", stderr);
++	exit(EXIT_FAILURE);
++    }
++    rc = DosDevIOCtl(Hf, IOCTL_POWER, POWER_GETPOWERSTATUS,
++		     &param, sizeof param, &cbParmLen,
++		     &ReturnCode, sizeof ReturnCode, &cbDataLen);
++    if(rc||ReturnCode){
++	fputs("xbatt: IOCTL_POWER/POWER_GETPOWERSTATUS failed\n", stderr);
++	exit(EXIT_FAILURE);
++    }
++    ret.remain = param.BatteryLife;
++    ret.acline = param.ACStatus;
++    ret.charge = param.BatteryStatus;
++    DosClose(Hf);
++#endif	/* __EMX__ */
++
+ #ifdef	__FreeBSD__
+     struct apm_info	info;
+ 
